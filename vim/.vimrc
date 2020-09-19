@@ -1,0 +1,129 @@
+" Specify a directory for plugins
+" - For Neovim: stdpath('data') . '/plugged'
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin('~/.vim/plugged')
+
+" Use release branch (recommend)
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+Plug 'tpope/vim-fugitive'
+
+Plug 'preservim/nerdtree'
+
+" Initialize plugin system
+call plug#end()
+
+let g:coc_global_extensions = [
+    \ 'coc-json',
+    \ 'coc-python',
+    \ 'coc-highlight',
+    \ 'coc-lists',
+    \ 'coc-yank',
+    \ 'coc-vimlsp',
+    \ 'coc-tabnine',
+    \ 'coc-markdownlint',
+    \ ]
+
+" You will have bad experience for diagnostic messages when it's default 4000.
+setlocal updatetime=300
+setlocal signcolumn=yes
+
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other
+" plugin.
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~ '\s'
+endfunction
+
+inoremap <buffer><silent><expr> <tab>
+      \ pumvisible() ? "\<c-n>" :
+      \ <sid>check_back_space() ? "\<tab>" :
+      \ coc#refresh()
+
+" use <c-space>for trigger completion
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" use <tab> and <s-tab> to navigate the completion list
+inoremap <expr> <tab> pumvisible() ? "\<c-n>" : "\<tab>"
+inoremap <expr> <s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+
+" use <cr> to confirm completion
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Or use `complete_info` if your vim support it, like:
+" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Use `[g` and `]g` to navigate diagnostics
+nmap <buffer><silent> [g <plug>(coc-diagnostic-prev)
+nmap <buffer><silent> ]g <plug>(coc-diagnostic-next)
+
+" Remap keys for gotos
+nmap <buffer><silent> gd <plug>(coc-definition)
+nmap <buffer><silent> gy <plug>(coc-type-definition)
+nmap <buffer><silent> gi <plug>(coc-implementation)
+nmap <buffer><silent> gr <plug>(coc-references)
+
+" Use K to show documentation in preview window
+nnoremap <buffer><silent> K :call <sid>show_documentation()<cr>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+nmap <buffer><leader>rn <plug>(coc-rename)
+
+xmap <buffer><leader>f  <plug>(coc-format-selected)
+nmap <buffer><leader>f  <plug>(coc-format-selected)
+
+augroup coc_group
+  autocmd!
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Fix autofix problem of current line
+nmap <buffer><leader>qf  <plug>(coc-fix-current)
+
+" Create mappings for function text object, requires document symbols feature
+" of languageserver.
+xmap <buffer> if <plug>(coc-funcobj-i)
+xmap <buffer> af <plug>(coc-funcobj-a)
+omap <buffer> if <plug>(coc-funcobj-i)
+omap <buffer> af <plug>(coc-funcobj-a)
+
+command! -nargs=0 Format :call CocAction('format')
+command! -nargs=? Fold :call CocAction('fold', <f-args>)
+command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
+
+" Ideally, we'd want these next mappings to always exist (or at least the
+" commands), not just for certain filetypes; however, for that we'd have to
+" eagerly load coc in its entirety. So we compromise by making these mappings
+" available everywhere once coc has been loaded. Which makes sense, because we
+" consider any vim session in which coc isn't loaded to be a lightweight one,
+" not meant for code editing; thus we don't need these then.
+nnoremap <silent> <leader>c  :<c-u>CocList commands<cr>
+nnoremap <silent> <leader>g  :<c-u>CocList grep<cr>
+nnoremap <silent> <c-p>      :<c-u>CocList files<cr>
+
+" These really only make sense in the context of a coc-needing source file.
+nnoremap <buffer><silent> <leader>a  :<c-u>CocList diagnostics<cr>
+nnoremap <buffer><silent> <leader>o  :<c-u>CocList outline<cr>
+nnoremap <buffer><silent> <leader>s  :<c-u>CocList -I symbols<cr>
+
+" Set tabstop to 4 -- TODO change this to be for each language "
+set softtabstop=4
+
+" Ctrl + n - Open NerdTree "
+map <C-n> :NERDTreeToggle<CR>
+
+if has('persistent_undo')      "check if your vim version supports it
+  set undofile                 "turn on the feature
+  set undodir=$HOME/.vim/undo  "directory where the undo files will be stored
+endif
